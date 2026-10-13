@@ -1,26 +1,18 @@
-# Step 1: Use an official Maven image with JDK 17 to build and bundle the app
-#FROM maven:3.8.6-openjdk-17-slim AS build
-#FROM eclipse-temurin:17-jdk-slim AS build
-#FROM eclipse-temurin:17-jdk-jammy AS build
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Copy the build configuration and source code
+# Copy the build config first so Maven can cache dependencies
 COPY pom.xml .
-COPY src ./src
-
-# Pre-fetch dependencies to speed up subsequent image builds
 RUN mvn dependency:go-offline -B
 
-# Package the application tests without executing them during image compilation
-RUN mvn test-compile
+# Copy source and compile
+COPY src ./src
+RUN mvn test-compile -B
 
-# Step 2: Use a slim runtime image containing Chrome for execution headless environment
-#FROM openjdk:17-slim
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:17-jre-jammy AS runtime
 WORKDIR /app
 
-# Install stable Chrome dependencies required for headless Selenium runs
+# Install browser dependencies for headless Selenium
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
@@ -33,11 +25,15 @@ RUN apt-get update && apt-get install -y \
     chromium \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy compiled classes and dependencies from the build stage
-COPY --from=build /app /app
+# Copy only the built app from the build stage
+COPY --from=build /app/target /app/target
 
-# Set environment variable to target the internal Chromium binary if needed
 ENV CHROME_BIN=/usr/bin/chromium
 
-# Default command to run the TestNG tests inside the container
+# If this image is meant to run tests inside the container, keep this:
 CMD ["mvn", "test"]
+
+
+
+
+
