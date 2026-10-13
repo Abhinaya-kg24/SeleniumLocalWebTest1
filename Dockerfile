@@ -1,7 +1,8 @@
 # Step 1: Use an official Maven image with JDK 17 to build and bundle the app
 #FROM maven:3.8.6-openjdk-17-slim AS build
 #FROM eclipse-temurin:17-jdk-slim AS build
-FROM eclipse-temurin:17-jdk-jammy AS build
+#FROM eclipse-temurin:17-jdk-jammy AS build
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 
 # Copy the build configuration and source code
