@@ -14,7 +14,8 @@ RUN mvn dependency:go-offline -B
 RUN mvn test-compile
 
 # Step 2: Use a slim runtime image containing Chrome for execution headless environment
-FROM openjdk:17-slim
+#FROM openjdk:17-slim
+FROM eclipse-temurin:17-jre-slim
 WORKDIR /app
 
 # Install stable Chrome dependencies required for headless Selenium runs
